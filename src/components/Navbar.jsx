@@ -12,6 +12,7 @@ function Navbar() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiResults, setAiResults] = useState(null);
   const [showResults, setShowResults] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleAISearch = async (e) => {
@@ -37,7 +38,6 @@ function Navbar() {
         setAiResults(matched);
         setShowResults(true);
       } else {
-        // Fallback to keyword search
         navigate(`/products?search=${encodeURIComponent(aiQuery.trim())}`);
       }
     } catch (err) {
@@ -47,22 +47,25 @@ function Navbar() {
       setAiLoading(false);
     }
   };
+
   return (
     <header className="sticky top-0 z-50">
 
       {/* Top announcement bar */}
-      <div className="bg-blue-700 text-white text-xs py-1.5 px-6 flex justify-between items-center">
-        <span>🎉 Free shipping on orders over $100 | Use code <strong>SHOPZONE20</strong> for 20% off!</span>
-        <div className="flex gap-3 items-center">
+      <div className="bg-blue-700 text-white text-xs py-1.5 px-3 sm:px-6 flex justify-between items-center gap-2">
+        <span className="truncate sm:whitespace-normal">
+          🎉 Free shipping on $100+ | Code <strong>SHOPZONE20</strong>
+        </span>
+        <div className="flex gap-2 items-center flex-shrink-0">
           {user ? (
-            <span className="font-semibold">👋 {user.name}</span>
+            <span className="font-semibold hidden sm:inline">👋 {user.name}</span>
           ) : (
-            <div className="flex gap-2 items-center">
-              <Link to="/login" className="bg-white text-blue-700 px-4 py-1.5 rounded-full text-xs font-bold hover:bg-blue-50 transition">
+            <div className="flex gap-1.5 sm:gap-2 items-center">
+              <Link to="/login" className="bg-white text-blue-700 px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-bold hover:bg-blue-50 transition whitespace-nowrap">
                 Login
               </Link>
-              <Link to="/register" className="bg-yellow-400 text-gray-900 px-4 py-1.5 rounded-full text-xs font-bold hover:bg-yellow-300 transition">
-                Register Free 🎉
+              <Link to="/register" className="bg-yellow-400 text-gray-900 px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-bold hover:bg-yellow-300 transition whitespace-nowrap">
+                Register 🎉
               </Link>
             </div>
           )}
@@ -70,11 +73,36 @@ function Navbar() {
       </div>
 
       {/* Main Navbar */}
-      <div className="bg-white shadow-md px-6 py-3 flex flex-col md:flex-row items-center gap-3">
-        <Link to="/" className="text-2xl font-bold text-blue-600 whitespace-nowrap">🛒 ShopZone</Link>
+      <div className="bg-white shadow-md px-3 sm:px-6 py-3 flex flex-wrap md:flex-row items-center gap-3">
+
+        {/* Logo + Hamburger row (mobile) */}
+        <div className="w-full md:w-auto flex items-center justify-between">
+          <Link to="/" className="text-xl sm:text-2xl font-bold text-blue-600 whitespace-nowrap">
+            🛒 ShopZone
+          </Link>
+
+          {/* Cart + Hamburger visible on mobile, inline with logo */}
+          <div className="flex items-center gap-3 md:hidden">
+            <Link to="/cart" className="relative text-gray-700 flex items-center">
+              <span className="text-2xl">🛒</span>
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                  {cartCount > 99 ? '99+' : cartCount}
+                </span>
+              )}
+            </Link>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="text-gray-700 text-2xl leading-none p-1"
+              aria-label="Toggle menu"
+            >
+              {mobileMenuOpen ? '✕' : '☰'}
+            </button>
+          </div>
+        </div>
 
         {/* AI Search Bar */}
-        <div className="flex-1 max-w-2xl relative">
+        <div className="w-full md:flex-1 md:max-w-2xl relative order-3 md:order-none">
           <form onSubmit={handleAISearch} className="flex">
             <div className="relative flex-1">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-purple-500 text-lg">✨</span>
@@ -82,19 +110,19 @@ function Navbar() {
                 type="text"
                 value={aiQuery}
                 onChange={e => { setAiQuery(e.target.value); setShowResults(false); }}
-                placeholder='Try: "laptop under $1500" or "best camera for travel"'
-                className="w-full border border-gray-300 rounded-l-xl pl-9 pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm"
+                placeholder='Try: "laptop under $1500"'
+                className="w-full border border-gray-300 rounded-l-xl pl-9 pr-2 sm:pr-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-purple-400 text-sm min-w-0"
               />
             </div>
             <button
               type="submit"
               disabled={aiLoading}
-              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-5 py-2.5 rounded-r-xl hover:opacity-90 text-sm font-semibold flex items-center gap-2 disabled:opacity-60"
+              className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-3 sm:px-5 py-2.5 rounded-r-xl hover:opacity-90 text-sm font-semibold flex items-center gap-2 disabled:opacity-60 whitespace-nowrap"
             >
               {aiLoading ? (
-                <>⏳ Searching...</>
+                <span>⏳<span className="hidden sm:inline"> Searching...</span></span>
               ) : (
-                <>✨ AI Search</>
+                <span>✨<span className="hidden sm:inline"> AI Search</span></span>
               )}
             </button>
           </form>
@@ -144,13 +172,12 @@ function Navbar() {
           )}
         </div>
 
-        {/* Right Icons */}
-        <div className="flex items-center gap-4 text-gray-700 text-sm font-medium">
-          <Link to="/" className="hover:text-blue-600 hidden md:block">Home</Link>
-          <Link to="/products" className="hover:text-blue-600 hidden md:block">Products</Link>
-          <Link to="/deals" className="hover:text-red-500 text-red-500 font-bold hidden md:block">🔥 Deals</Link>
+        {/* Right Icons - Desktop only */}
+        <div className="hidden md:flex items-center gap-4 text-gray-700 text-sm font-medium">
+          <Link to="/" className="hover:text-blue-600">Home</Link>
+          <Link to="/products" className="hover:text-blue-600">Products</Link>
+          <Link to="/deals" className="hover:text-red-500 text-red-500 font-bold">🔥 Deals</Link>
 
-          {/* Cart */}
           <Link to="/cart" className="relative hover:text-blue-600 flex items-center gap-1">
             <span className="text-2xl">🛒</span>
             {cartCount > 0 && (
@@ -160,17 +187,16 @@ function Navbar() {
             )}
           </Link>
 
-          {/* User Profile */}
           {user ? (
             <Link to="/profile"
-              className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg hover:bg-blue-100 transition hidden md:flex">
+              className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg hover:bg-blue-100 transition">
               <div className="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <span className="text-blue-600 font-semibold text-sm">{user.name.split(' ')[0]}</span>
             </Link>
           ) : (
-            <div className="hidden md:flex gap-2">
+            <div className="flex gap-2">
               <Link to="/login"
                 className="border-2 border-blue-600 text-blue-600 px-4 py-2 rounded-lg font-bold hover:bg-blue-50 transition text-sm">
                 Login
@@ -182,6 +208,36 @@ function Navbar() {
             </div>
           )}
         </div>
+
+        {/* Mobile dropdown menu */}
+        {mobileMenuOpen && (
+          <div className="w-full md:hidden flex flex-col gap-2 pt-3 border-t mt-2 text-sm font-medium text-gray-700">
+            <Link to="/" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-blue-600">🏠 Home</Link>
+            <Link to="/products" onClick={() => setMobileMenuOpen(false)} className="py-2 hover:text-blue-600">📦 Products</Link>
+            <Link to="/deals" onClick={() => setMobileMenuOpen(false)} className="py-2 text-red-500 font-bold">🔥 Deals</Link>
+
+            {user ? (
+              <Link to="/profile" onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-lg">
+                <div className="w-7 h-7 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold">
+                  {user.name.charAt(0).toUpperCase()}
+                </div>
+                <span className="text-blue-600 font-semibold">{user.name}</span>
+              </Link>
+            ) : (
+              <div className="flex gap-2 pt-1">
+                <Link to="/login" onClick={() => setMobileMenuOpen(false)}
+                  className="flex-1 text-center border-2 border-blue-600 text-blue-600 px-4 py-2 rounded-lg font-bold text-sm">
+                  Login
+                </Link>
+                <Link to="/register" onClick={() => setMobileMenuOpen(false)}
+                  className="flex-1 text-center bg-blue-600 text-white px-4 py-2 rounded-lg font-bold text-sm">
+                  Register 🎉
+                </Link>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </header>
   );
